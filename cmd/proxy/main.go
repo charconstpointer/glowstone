@@ -7,11 +7,12 @@ import (
 )
 
 var (
-	downstream = flag.String("downstream", "http://google.com", "downstream path")
-	laddr      = flag.String("laddr", "localhost:4013", "address for proxy to listen on")
+	downstream = flag.String("downstream", "144.217.199.16:25613", "downstream path")
+	addr       = flag.String("addr", ":4013", "address for proxy to listen on")
 )
 
 func main() {
-	proxy := glowstone.NewProxy(":4013", ":25565", ":25566")
+	flag.Parse()
+	proxy := glowstone.NewProxy(*addr, *downstream)
 	proxy.Listen()
 }
