@@ -13,23 +13,28 @@ import (
 )
 
 var (
-	downstream = flag.String("downStream", "http://google.com", "downstream path")
+	downstream = flag.String("downstream", "http://google.com", "downstream path")
+	laddr = flag.String("laddr", "localhost:4013", "address for proxy to listen on")
 )
 
 func main() {
 	flag.Parse()
-	l, err := net.Listen("tcp", ":4444")
+	log.Println(*downstream)
+	l, err := net.Listen("tcp", *laddr)
 	if err != nil {
 		errors.Wrap(err, "could not start proxy")
 	}
 	for {
+		log.Println("waiting for clients")
 		s, err := l.Accept()
 		if err != nil {
 			log.Fatal(err.Error())
 		}
 		go func(s net.Conn) {
 			log.Println(s.RemoteAddr())
-			downStream, err := net.DialTimeout("tpc", *downstream, time.Second)
+			downStream, err := net.Dial("tpc", "localhost:25565")
+			
+			log.Println(downStream)
 			if err != nil {
 				errors.Wrap(err, "could not created downstream TCP client")
 				return
