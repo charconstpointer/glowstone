@@ -10,10 +10,13 @@ proxy.Listen()
 ```
 
 > Add new server
+
 ![](https://i.imgur.com/YrBW4bP.png)
 
 > Your server should be visible and repspond to client's healthchecks
+
 ![](https://i.imgur.com/Itc5rZv.png)
 
 >If your downstream servers are reachable, you should be able to play 🍾
+
 ![](https://i.imgur.com/HZhy7HJ.png)
