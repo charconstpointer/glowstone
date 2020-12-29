@@ -1,6 +1,7 @@
 package glowstone
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -17,14 +18,11 @@ type Proxy struct {
 	m       sync.Mutex
 }
 
-func NewProxy(laddr string) TcpProxy {
+func NewProxy(laddr string, ds ...string) TcpProxy {
 	return &Proxy{
 		laddr:   laddr,
 		clients: 0,
-		pool: []string{
-			":25565",
-			":25566",
-		},
+		pool:    ds,
 	}
 }
 
@@ -44,16 +42,43 @@ func (p *Proxy) Listen() error {
 		go p.handleClient(c)
 	}
 }
-
+func (p *Proxy) choseServer() string {
+	i := p.clients % len(p.pool)
+	log.Println("chosen server", p.pool[i])
+	return p.pool[i]
+}
 func (p *Proxy) handleClient(c net.Conn) {
-	log.Println("handle new client", c.RemoteAddr())
-	ds, err := net.Dial("tcp", ":25565")
+	server := p.choseServer()
+	log.Println("handle new client", c.RemoteAddr(), "connecting to server", server)
+	ds, err := net.Dial("tcp", server)
+	log.Println(ds.LocalAddr())
 	if err != nil {
 		log.Fatal(err.Error())
 
 	}
-	log.Println("connected to downstream server", ds)
+	log.Println("connected to downstream server", ds.RemoteAddr())
+	go p.handleClientStream(ds, c)
+	go p.handleServerStream(c, ds)
 
-	go io.Copy(c, ds)
-	go io.Copy(ds, c)
+}
+func (p *Proxy) decClients() {
+	defer p.m.Unlock()
+	p.m.Lock()
+	p.clients--
+}
+
+func (p *Proxy) handleServerStream(c io.Writer, ds io.Reader) {
+	if _, err := io.Copy(c, ds); err != nil {
+		log.Println("stream closed")
+		p.decClients()
+		fmt.Println(err)
+	}
+}
+
+func (p *Proxy) handleClientStream(ds io.Writer, c io.Reader) {
+	if _, err := io.Copy(ds, c); err != nil {
+		log.Println("stream closed")
+		p.decClients()
+		fmt.Println(err)
+	}
 }

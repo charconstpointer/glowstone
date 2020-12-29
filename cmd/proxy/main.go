@@ -12,6 +12,6 @@ var (
 )
 
 func main() {
-	proxy := glowstone.NewProxy(":4013")
+	proxy := glowstone.NewProxy(":4013", ":25565", ":25566")
 	proxy.Listen()
 }
