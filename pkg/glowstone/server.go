@@ -10,6 +10,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
+	"github.com/docker/go-connections/nat"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -53,7 +54,16 @@ func (s *HTTPServer) CreateServer() error {
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image: "itzg/minecraft-server",
 		Env:   []string{"EULA=TRUE"},
-	}, nil, nil, nil, "")
+	}, &container.HostConfig{
+		PortBindings: nat.PortMap{
+			"25565/tcp": []nat.PortBinding{
+				{
+					HostIP:   "0.0.0.0",
+					HostPort: "25565",
+				},
+			},
+		},
+	}, nil, nil, "")
 	if err != nil {
 		return err
 	}
