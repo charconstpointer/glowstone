@@ -57,8 +57,9 @@ func (p *Proxy) handleClient(c net.Conn) {
 
 	}
 	log.Println("connected to downstream server", ds.RemoteAddr())
-	go p.handleClientStream(ds, c)
-	go p.handleServerStream(c, ds)
+	go p.copy(ds, c)
+	go p.copy(c, ds)
+	// go p.copy(c, ds)
 
 }
 func (p *Proxy) decClients() {
@@ -67,12 +68,55 @@ func (p *Proxy) decClients() {
 	p.clients--
 }
 
-func (p *Proxy) handleServerStream(c io.Writer, ds io.Reader) {
-	if _, err := io.Copy(c, ds); err != nil {
-		log.Println("stream closed")
-		p.decClients()
-		fmt.Println(err)
+func (p *Proxy) copy(c io.Writer, ds io.Reader) {
+	size := 32 * 1024
+	buf := make([]byte, size)
+	for {
+		nr, er := ds.Read(buf)
+		msg := "hello world"
+		l := len(msg)
+		buf = append(buf, []byte(msg)...)
+		buf = buf[:len(buf)-l]
+		if er != nil {
+			log.Println("er != nil ")
+		}
+		if nr > 0 {
+			log.Println(nr)
+			nw, ew := c.Write(buf[0:nr])
+			if nw > 0 {
+				log.Println(nw)
+			}
+			if ew != nil {
+				log.Println("ew != nil")
+				break
+			}
+			if nr != nw {
+				log.Println("nr != nw ")
+				break
+			}
+		}
+		if er != nil {
+			log.Println(er.Error())
+			break
+		}
 	}
+}
+
+func (p *Proxy) handleServerStream(c io.Writer, ds io.Reader) {
+	buffer := make([]byte, 4096)
+	for {
+		n, err := ds.Read(buffer)
+		log.Println(n)
+		if err != nil {
+			p.decClients()
+			log.Println(err.Error())
+		}
+	}
+	// if _, err := io.Copy(c, ds); err != nil {
+	// 	log.Println("stream closed")
+	// 	p.decClients()
+	// 	fmt.Println(err)
+	// }
 }
 
 func (p *Proxy) handleClientStream(ds io.Writer, c io.Reader) {
