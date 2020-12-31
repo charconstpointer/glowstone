@@ -5,10 +5,12 @@ import (
 	"net"
 	"regexp"
 	"time"
+
+	"github.com/charconstpointer/glowstone/pkg/glowstone"
 )
 
 func main() {
-	handlers := make([]*Handler, 0)
+	handlers := make([]*glowstone.Handler, 0)
 	conn, err := net.Dial("tcp", ":8889")
 	if err != nil {
 		log.Fatal(err.Error())
@@ -33,7 +35,7 @@ func main() {
 			log.Println("handling", id)
 			if handlersContains(handlers, id) == nil {
 				log.Printf("Creating new handler for %s", id)
-				handler := NewHandler(id, conn)
+				handler := glowstone.NewHandler(id, conn)
 				handlers = append(handlers, handler)
 			}
 			handler := handlersContains(handlers, id)
@@ -42,69 +44,7 @@ func main() {
 	}
 }
 
-type Handler struct {
-	ID         string
-	upstream   net.Conn
-	downstream net.Conn
-}
-
-func (h *Handler) propagateUpstream() {
-	size := 32 * 1024
-	buf := make([]byte, size)
-	for {
-		nr, er := h.downstream.Read(buf)
-		if nr > 0 {
-			toWrite := buf
-			//TODO append client id
-			nw, _ := h.upstream.Write(toWrite[:nr])
-			if nw > 0 {
-
-			}
-			if nr != nw {
-				log.Println("propagateUpstream nr != nw ")
-				break
-			}
-		}
-		if er != nil {
-			log.Println("propagateUpstream.err")
-			log.Println(er.Error())
-			h.downstream.Close()
-			break
-		}
-	}
-}
-
-func (h *Handler) Handle(data []byte) {
-	log.Println(string(data))
-	if len(data) > 0 {
-		//TODO remove client id
-		nw, _ := h.downstream.Write(data)
-		log.Printf("handler %s wrote %d bytes", h.ID, nw)
-		if nw > 0 {
-			// log.Println(nw)
-		}
-	}
-}
-
-func NewHandler(id string, upstream net.Conn) *Handler {
-	server := ":25565"
-	ds, err := net.Dial("tcp", server)
-	log.Println(ds.LocalAddr())
-	if err != nil {
-		log.Fatal(err.Error())
-
-	}
-
-	handler := Handler{
-		ID:         id,
-		upstream:   upstream,
-		downstream: ds,
-	}
-	go handler.propagateUpstream()
-	return &handler
-}
-
-func handlersContains(handlers []*Handler, id string) *Handler {
+func handlersContains(handlers []*glowstone.Handler, id string) *glowstone.Handler {
 	r, _ := regexp.Compile("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")
 	id = r.FindString(id)
 	for _, c := range handlers {
