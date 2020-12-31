@@ -28,7 +28,8 @@ func main() {
 		}
 		log.Println(nr)
 		if nr > 0 {
-			id := "marysia"
+			//TODO replace with dynamic id
+			id := "someid"
 			log.Println("handling", id)
 			if handlersContains(handlers, id) == nil {
 				log.Printf("Creating new handler for %s", id)
@@ -52,24 +53,13 @@ func (h *Handler) propagateUpstream() {
 	buf := make([]byte, size)
 	for {
 		nr, er := h.downstream.Read(buf)
-		// if er != nil {
-		// 	log.Println(er.Error())
-		// 	// h.downstream.Close()
-		// 	continue
-		// }
 		if nr > 0 {
-			// id := make([]byte, 64)
-			// copy(id, h.ID)
-			// toWrite := append(buf[0:nr], id...)
-			// toWrite := append(buf[0:nr], id...)
-			nw, _ := h.upstream.Write(buf[:nr])
+			toWrite := buf
+			//TODO append client id
+			nw, _ := h.upstream.Write(toWrite[:nr])
 			if nw > 0 {
 
 			}
-			// if ew != nil {
-			// 	log.Println("ew != nil")
-			// 	break
-			// }
 			if nr != nw {
 				log.Println("propagateUpstream nr != nw ")
 				break
@@ -87,17 +77,12 @@ func (h *Handler) propagateUpstream() {
 func (h *Handler) Handle(data []byte) {
 	log.Println(string(data))
 	if len(data) > 0 {
+		//TODO remove client id
 		nw, _ := h.downstream.Write(data)
 		log.Printf("handler %s wrote %d bytes", h.ID, nw)
 		if nw > 0 {
 			// log.Println(nw)
 		}
-		// if ew != nil {
-		// 	log.Println("ew != nil")
-		// }
-		// if len(data) != nw {
-		// 	log.Println("nr != nw ")
-		// }
 	}
 }
 
