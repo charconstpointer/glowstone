@@ -33,7 +33,7 @@ func NewID(value string) (*ID, error) {
 
 //AddID appends ID to a given slice of data
 func AddID(payload []byte, ID ID) []byte {
-	payloadID :=  append(payload, ID.Value...)
+	payloadID := append(payload, ID.Value...)
 	x := string(payloadID)
 	println(x)
 	return payloadID
@@ -43,7 +43,15 @@ func AddID(payload []byte, ID ID) []byte {
 func GetID(payload []byte) string {
 	b := payload[len(payload)-64:]
 	ID := string(b)
-	return   fmt.Sprintf("%s", strings.TrimFunc(ID, func(r rune) bool {
+	return fmt.Sprintf("%s", strings.TrimFunc(ID, func(r rune) bool {
 		return r == 0
 	}))
+}
+
+//RemoveID removes ID from given payload and returns identifier and cleaned payload
+func RemoveID(payload []byte) ([]byte, error) {
+	if len(payload) < 64 {
+		return nil, fmt.Errorf("Provided payload is not small, it could not have ID encoded into it")
+	}
+	return payload[:len(payload)-64], nil
 }

@@ -59,3 +59,23 @@ func TestNewID(t *testing.T) {
 		t.Errorf("Expected ID value to be %s instead got %s", expected, gotValue)
 	}
 }
+
+func TestRemoveID(t *testing.T) {
+	value := "foobarbaz"
+	ID, _ := NewID(value)
+	payload := make([]byte, 1000)
+	payloadWithID := AddID(payload, *ID)
+	expectedLen := len(payload)
+	newPayload, _ := RemoveID(payloadWithID)
+	gotLen := len(newPayload)
+
+	if expectedLen != gotLen {
+		t.Errorf("Expected size of payload to be %d instead got %d", expectedLen, gotLen)
+	}
+
+	for i, b := range newPayload {
+		if payload[i] != b {
+			t.Errorf("payloads aren't equal, at index %d expected to get %v instead got %v", i, payload[i], b)
+		}
+	}
+}
