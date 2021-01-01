@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"strings"
 	"sync"
 )
 
@@ -19,10 +20,28 @@ type Proxy struct {
 }
 
 func NewProxy(laddr string, ds ...string) TcpProxy {
+	downstreams := make([]string, len(ds))
+	for _, d := range ds {
+		log.Println(d)
+		if strings.Contains(d, "localhost") {
+			downstreams = append(downstreams, d)
+			continue
+		}
+		if net.ParseIP(d) == nil {
+			ip, err := net.LookupIP(d)
+			if err != nil {
+				log.Printf("could not complete DNS look up for %s", d)
+				continue
+			}
+			for _, ipaddr := range ip {
+				downstreams = append(downstreams, ipaddr.String())
+			}
+		}
+	}
 	return &Proxy{
 		laddr:   laddr,
 		clients: 0,
-		pool:    ds,
+		pool:    downstreams,
 	}
 }
 
@@ -112,11 +131,6 @@ func (p *Proxy) handleServerStream(c io.Writer, ds io.Reader) {
 			log.Println(err.Error())
 		}
 	}
-	// if _, err := io.Copy(c, ds); err != nil {
-	// 	log.Println("stream closed")
-	// 	p.decClients()
-	// 	fmt.Println(err)
-	// }
 }
 
 func (p *Proxy) handleClientStream(ds io.Writer, c io.Reader) {
