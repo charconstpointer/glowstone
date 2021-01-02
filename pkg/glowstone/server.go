@@ -38,7 +38,7 @@ func NewServer() *HTTPServer {
 func (s *HTTPServer) addServers(serv *Server) error {
 	for _, sv := range s.servers {
 		if sv.ID == serv.ID {
-			fmt.Errorf("server %s already exists on glowstone server", serv.ID)
+			return fmt.Errorf("server %s already exists on glowstone server", serv.ID)
 		}
 	}
 	s.servers = append(s.servers, serv)

@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package glowstone;
+
+option go_package = "pkg/glowstone";
+
+service Glow {
+    rpc Listen (stream Tick) returns (stream Tick);
+
+}
+
+message Tick {
+    bytes payload=1;
+    string src=2;
+    string dest=3;
+}

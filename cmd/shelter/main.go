@@ -1,70 +1,62 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
-	"regexp"
 	"time"
 
 	"github.com/charconstpointer/glowstone/pkg/glowstone"
+	"google.golang.org/grpc"
 )
 
 func main() {
-	handlers := make([]*glowstone.Handler, 0)
-	conn, err := net.Dial("tcp", ":8889")
+	conn, err := grpc.Dial(":8889", grpc.WithInsecure())
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	log.Println("connected to tunnel")
+	client := glowstone.NewGlowClient(conn)
+	stream, err := client.Listen(context.Background())
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	downstream, err := net.Dial("tcp", ":25565")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	if err != nil {
-		log.Fatal(err.Error())
-
-	}
-	size := 32 * 1024
-	buf := make([]byte, size)
-	for {
-		time.Sleep(1000 * time.Millisecond)
-		nr, er := conn.Read(buf)
-		if er != nil {
-			log.Println("could not read from upstream")
-		}
-		log.Println(nr)
-		if nr > 0 {
-			//TODO replace with dynamic id
-			id := "someid"
-			log.Println("handling", id)
-			if handlersContains(handlers, id) == nil {
-				log.Printf("Creating new handler for %s", id)
-				handler := glowstone.NewHandler(id, conn)
-				handlers = append(handlers, handler)
+	//propagate up
+	go func(stream glowstone.Glow_ListenClient, downstream net.Conn) {
+		b := make([]byte, 32*1024)
+		for {
+			n, err := downstream.Read(b)
+			if err != nil {
+				log.Fatal(err.Error())
 			}
-			handler := handlersContains(handlers, id)
-			handler.Handle(buf[:nr])
+			err = stream.Send(&glowstone.Tick{
+				Src:     "downstream",
+				Dest:    "tunnel",
+				Payload: b[:n],
+			})
+			if err != nil {
+				log.Fatal(err.Error())
+			}
 		}
-	}
-}
-
-func handlersContains(handlers []*glowstone.Handler, id string) *glowstone.Handler {
-	r, _ := regexp.Compile("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")
-	id = r.FindString(id)
-	for _, c := range handlers {
-		toMatch := r.FindString(c.ID)
-
-		if toMatch == id {
-			return c
+	}(stream, downstream)
+	//propagate down
+	for {
+		msg, err := stream.Recv()
+		if err != nil {
+			log.Println(err.Error())
+			time.Sleep(100 * time.Millisecond)
+			continue
 		}
-	}
-	return nil
-}
-func contains(clients []string, id string) bool {
-	r, _ := regexp.Compile("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")
-	id = r.FindString(id)
-	for _, c := range clients {
-		c = r.FindString(c)
-
-		if c == id {
-			return true
+		n, err := downstream.Write(msg.Payload)
+		if err != nil {
+			log.Fatal(err.Error())
 		}
+		log.Println("wrote", n, "bytes to downstream")
 	}
-	return false
+
 }
