@@ -6,6 +6,7 @@ import (
 	"google.golang.org/grpc"
 	"log"
 	"net"
+	"time"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -48,12 +49,13 @@ func (s *RpcServer) Listen(stream Glow_ListenServer) error {
 		for {
 			msg, err := stream.Recv()
 			if err != nil {
-				log.Println(err.Error())
+				log.Println("cannot receive",err.Error())
+				time.Sleep(time.Second)
 				continue
 			}
 			n, err := s.upstreams[0].Write(msg.Payload)
 			if err != nil {
-				log.Fatal(err.Error())
+				log.Println("cant write")
 			}
 			log.Println("wrote", n, "bytes up")
 		}
