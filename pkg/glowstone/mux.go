@@ -15,6 +15,7 @@ import (
 type RpcServer struct {
 	upstreams []net.Conn
 	upAddr    string
+	new       chan net.Conn
 }
 
 func NewRpcServer(up string) *RpcServer {
@@ -36,6 +37,8 @@ func (s *RpcServer) ListenUp() error {
 			return err
 		}
 		s.upstreams = append(s.upstreams, conn)
+		s.new <- conn
+		log.Println("new client indexed")
 	}
 }
 
@@ -48,6 +51,19 @@ func (s *RpcServer) Listen(stream Glow_ListenServer) error {
 			return listenUpstream(upstream, stream)
 		})
 	}
+
+	g.Go(func() error {
+		for {
+			select {
+			case c := <-s.new:
+				go listenUpstream(c, stream)
+				log.Println("handling new client")
+			default:
+
+			}
+		}
+	})
+
 	g.Go(func() error {
 		for {
 			msg, err := stream.Recv()
