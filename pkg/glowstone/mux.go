@@ -3,10 +3,11 @@ package glowstone
 import (
 	context "context"
 	"fmt"
-	"google.golang.org/grpc"
 	"log"
 	"net"
 	"time"
+
+	"google.golang.org/grpc"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -27,8 +28,10 @@ func (s *RpcServer) ListenUp() error {
 	if err != nil {
 		return err
 	}
+
 	for {
 		conn, err := l.Accept()
+		log.Println("new client connected", conn.RemoteAddr())
 		if err != nil {
 			return err
 		}
@@ -49,10 +52,11 @@ func (s *RpcServer) Listen(stream Glow_ListenServer) error {
 		for {
 			msg, err := stream.Recv()
 			if err != nil {
-				log.Println("cannot receive",err.Error())
+				log.Println("cannot receive", err.Error())
 				time.Sleep(time.Second)
 				continue
 			}
+			log.Println(s.upstreams)
 			n, err := s.upstreams[0].Write(msg.Payload)
 			if err != nil {
 				log.Println("cant write")

@@ -15,6 +15,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	log.Println("connected to tunnel")
 	client := glowstone.NewGlowClient(conn)
 	stream, err := client.Listen(context.Background())
 	if err != nil {
