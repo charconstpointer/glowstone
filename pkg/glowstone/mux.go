@@ -21,6 +21,7 @@ type RpcServer struct {
 func NewRpcServer(up string) *RpcServer {
 	return &RpcServer{
 		upAddr: up,
+		new:    make(chan net.Conn),
 	}
 }
 
@@ -37,6 +38,7 @@ func (s *RpcServer) ListenUp() error {
 			return err
 		}
 		s.upstreams = append(s.upstreams, conn)
+		log.Println("indexing new")
 		s.new <- conn
 		log.Println("new client indexed")
 	}
@@ -53,13 +55,13 @@ func (s *RpcServer) Listen(stream Glow_ListenServer) error {
 	}
 
 	g.Go(func() error {
+		log.Println("started watching for new clients")
 		for {
+			log.Println("select")
 			select {
 			case c := <-s.new:
-				go listenUpstream(c, stream)
 				log.Println("handling new client")
-			default:
-
+				go listenUpstream(c, stream)
 			}
 		}
 	})
@@ -72,12 +74,21 @@ func (s *RpcServer) Listen(stream Glow_ListenServer) error {
 				time.Sleep(time.Second)
 				continue
 			}
-			log.Println(s.upstreams)
-			n, err := s.upstreams[0].Write(msg.Payload)
-			if err != nil {
-				log.Println("cant write")
+
+			if len(s.upstreams) > 0 {
+				log.Println(s.upstreams)
+				n, err := s.upstreams[0].Write(msg.Payload)
+				if n == 0 {
+					s.upstreams = append(s.upstreams[:0], s.upstreams[1:]...)
+					//TODO propagate this event downstream, to close dead connection tunnel->minecraft
+					log.Println("Removed dead client")
+				}
+				if err != nil {
+					log.Println("cant write")
+				}
+				log.Println("wrote", n, "bytes up")
 			}
-			log.Println("wrote", n, "bytes up")
+
 		}
 		return nil
 	})
