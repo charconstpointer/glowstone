@@ -1,10 +1,10 @@
 package main
 
 import (
+	"encoding/gob"
 	"log"
 	"net"
 	"regexp"
-	"time"
 
 	"github.com/charconstpointer/glowstone/pkg/glowstone"
 )
@@ -20,27 +20,24 @@ func main() {
 		log.Fatal(err.Error())
 
 	}
-	size := 32 * 1024
-	buf := make([]byte, size)
 	for {
-		time.Sleep(1000 * time.Millisecond)
-		nr, er := conn.Read(buf)
-		if er != nil {
-			log.Println("could not read from upstream")
+		var msg glowstone.Msg
+		g := gob.NewDecoder(conn)
+		g.Decode(&msg)
+		if err != nil {
+			log.Println("func (h *Handler) Handle(data []byte) {", err.Error())
 		}
-		log.Println(nr)
-		if nr > 0 {
-			//TODO replace with dynamic id
-			id := "someid"
-			log.Println("handling", id)
-			if handlersContains(handlers, id) == nil {
-				log.Printf("Creating new handler for %s", id)
-				handler := glowstone.NewHandler(id, conn)
-				handlers = append(handlers, handler)
-			}
-			handler := handlersContains(handlers, id)
-			handler.Handle(buf[:nr])
+		if msg.Payload == nil {
+			log.Println("if msg.Payload == nil {")
+			continue
 		}
+		if handlersContains(handlers, "id") == nil {
+			log.Printf("Creating new handler for %s", "id")
+			handler := glowstone.NewHandler("id", conn)
+			handlers = append(handlers, handler)
+		}
+		handler := handlersContains(handlers, "id")
+		handler.Handle(&msg)
 	}
 }
 

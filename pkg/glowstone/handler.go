@@ -1,6 +1,7 @@
 package glowstone
 
 import (
+	"encoding/gob"
 	"log"
 	"net"
 )
@@ -17,16 +18,12 @@ func (h *Handler) propagateUpstream() {
 	for {
 		nr, er := h.downstream.Read(buf)
 		if nr > 0 {
-			toWrite := buf
-			//TODO append client id
-			nw, _ := h.upstream.Write(toWrite[:nr])
-			if nw > 0 {
-
+			g := gob.NewEncoder(h.upstream)
+			err := g.Encode(NewMsg(buf[:nr], "src string", "dest string"))
+			if err != nil {
+				log.Println("func (h *Handler) propagateUpstream() {", err.Error())
 			}
-			if nr != nw {
-				log.Println("propagateUpstream nr != nw ")
-				break
-			}
+			log.Println(nr)
 		}
 		if er != nil {
 			log.Println("propagateUpstream.err")
@@ -37,22 +34,20 @@ func (h *Handler) propagateUpstream() {
 	}
 }
 
-func (h *Handler) Handle(data []byte) {
-	log.Println(string(data))
-	if len(data) > 0 {
-		//TODO remove client id
-		nw, _ := h.downstream.Write(data)
-		log.Printf("handler %s wrote %d bytes", h.ID, nw)
-		if nw > 0 {
-			// log.Println(nw)
-		}
+func (h *Handler) Handle(msg *Msg) {
+	nw, err := h.downstream.Write(msg.Payload)
+	if nw > 0 {
+		log.Println("nw", nw)
+	}
+
+	if err != nil {
+		log.Println("func (h *Handler) Handle(data []byte) {", err.Error())
 	}
 }
 
 func NewHandler(id string, upstream net.Conn) *Handler {
 	server := ":25565"
 	ds, err := net.Dial("tcp", server)
-	log.Println(ds.LocalAddr())
 	if err != nil {
 		log.Fatal(err.Error())
 

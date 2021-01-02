@@ -1,9 +1,11 @@
 package main
 
 import (
-	"io"
+	"encoding/gob"
 	"log"
 	"net"
+
+	"github.com/charconstpointer/glowstone/pkg/glowstone"
 )
 
 type Player struct {
@@ -23,29 +25,19 @@ func NewPlayer(upstream net.Conn, downstream net.Conn, id string) *Player {
 }
 
 func (p *Player) propagateUpstream() {
-	size := 32 * 1024
-	buf := make([]byte, size)
 	for {
-		nr, er := p.downstream.Read(buf)
-		if nr > 0 {
-			id := buf[:len(buf)-64]
-			log.Println("ID?", string(id))
-			//TODO remove client id
-			nw, _ := p.upstream.Write(buf[:nr])
-			if nw > 0 {
-
-			}
-			if nr != nw {
-				log.Println("propagateUpstream nr != nw ")
-				break
-			}
+		var msg glowstone.Msg
+		g := gob.NewDecoder(p.downstream)
+		err := g.Decode(&msg)
+		if err != nil {
+			log.Println("err", err.Error())
 		}
-		if er != nil {
-			log.Println("propagateUpstream.err")
-			log.Println(er.Error())
-			p.downstream.Close()
-			break
+		log.Println(msg)
+		nw, err := p.upstream.Write(msg.Payload)
+		if err != nil {
+			log.Println("func (p *Player) propagateUpstream() {", err.Error())
 		}
+		log.Println("nw", nw)
 	}
 }
 func (p *Player) handle() {
@@ -57,23 +49,20 @@ func (p *Player) handle() {
 		if er != nil {
 			log.Println("could not read from upstream")
 		}
-		log.Println(nr)
 		if nr > 0 {
-			//TODO append client id
-			p.downstream.Write(buf[:nr])
+			log.Println("received from mc ", nr)
+			g := gob.NewEncoder(p.downstream)
+			err := g.Encode(glowstone.NewMsg(buf[:nr], "src string", "dest string"))
+			if err != nil {
+				log.Println("func (p *Player) handle() {", err.Error())
+			}
 		}
 	}
 
 }
 func (p *Player) Handle(data []byte) {
-	log.Println(string(data))
-	if len(data) > 0 {
-		nw, _ := p.downstream.Write(data)
-		log.Printf("handler %s wrote %d bytes", p.ID, nw)
-		if nw > 0 {
-			// log.Println(nw)
-		}
-	}
+	g := gob.NewEncoder(p.downstream)
+	g.Encode(glowstone.NewMsg(data, "src string", "dest string"))
 }
 
 func main() {
@@ -101,77 +90,6 @@ func main() {
 		}
 		p := NewPlayer(client, conn, client.RemoteAddr().String())
 		players = append(players, p)
-		go func(client net.Conn, p *Player) {
-			log.Println(p.ID, "connected")
-			if err != nil {
-				log.Fatal(err.Error())
 
-			}
-			// go copyClient(conn, client)
-			// go copyServer(client, conn)
-		}(client, p)
-	}
-}
-
-func copyClient(c io.Writer, ds net.Conn) {
-	size := 32 * 1024
-	buf := make([]byte, size)
-	for {
-		nr, er := ds.Read(buf)
-		if er != nil {
-			log.Println("er != nil ")
-			ds.Close()
-		}
-		if nr > 0 {
-			nw, ew := c.Write(buf[:nr])
-			if nw > 0 {
-				log.Println(nw)
-			}
-			if ew != nil {
-				log.Println("ew != nil")
-				break
-			}
-			if nr != nw {
-				log.Println("nr != nw ", nr, nw)
-				break
-			}
-		}
-		if er != nil {
-			log.Println(er.Error())
-			ds.Close()
-			break
-		}
-	}
-}
-
-func copyServer(c io.Writer, ds net.Conn) {
-	size := 32 * 1024
-	buf := make([]byte, size)
-	for {
-		nr, er := ds.Read(buf)
-		if er != nil {
-			log.Println("er != nil ")
-			ds.Close()
-		}
-		if nr > 0 {
-			nw, ew := c.Write(buf[:nr])
-			if nw > 0 {
-				log.Println("sent up", nw)
-			}
-			if ew != nil {
-				log.Println("ew != nil")
-				break
-			}
-			if nr != nw {
-				// if nr != nw {
-				log.Println("nr != nw ")
-				break
-			}
-		}
-		if er != nil {
-			log.Println(er.Error())
-			ds.Close()
-			break
-		}
 	}
 }
