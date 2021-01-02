@@ -1,35 +1,74 @@
 package glowstone
 
 import (
+	context "context"
+	"fmt"
+	"google.golang.org/grpc"
 	"log"
 	"net"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type RpcServer struct {
-	upstream net.Conn
+	upstreams []net.Conn
+	upAddr    string
+}
+
+func NewRpcServer(up string) *RpcServer {
+	return &RpcServer{
+		upAddr: up,
+	}
+}
+
+func (s *RpcServer) ListenUp() error {
+	l, err := net.Listen("tcp", s.upAddr)
+	if err != nil {
+		return err
+	}
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			return err
+		}
+		s.upstreams = append(s.upstreams, conn)
+	}
 }
 
 func (s *RpcServer) Listen(stream Glow_ListenServer) error {
-	go func(stream Glow_ListenServer) {
+	ctx := context.Background()
+	g, ctx := errgroup.WithContext(ctx)
+
+	for _, upstream := range s.upstreams {
+		g.Go(func() error {
+			return listenUpstream(upstream, stream)
+		})
+	}
+	g.Go(func() error {
 		for {
 			msg, err := stream.Recv()
 			if err != nil {
-				log.Println("cannot recv msg", err.Error())
+				log.Println(err.Error())
 				continue
 			}
-			n, err := s.upstream.Write(msg.Payload)
+			n, err := s.upstreams[0].Write(msg.Payload)
 			if err != nil {
-				log.Println("could not push to upstream", err.Error())
+				log.Fatal(err.Error())
 			}
-			log.Printf("wrote %d bytes to upstream", n)
-
+			log.Println("wrote", n, "bytes up")
 		}
-	}(stream)
+		return nil
+	})
+	err := g.Wait()
+	return err
+}
+
+func listenUpstream(upstream net.Conn, stream Glow_ListenServer) error {
 	b := make([]byte, 32*1024)
 	for {
-		n, err := s.upstream.Read(b)
+		n, err := upstream.Read(b)
 		if err != nil {
-			log.Println(err.Error())
+			return err
 		}
 		msg := Tick{
 			Payload: b[:n],
@@ -39,11 +78,25 @@ func (s *RpcServer) Listen(stream Glow_ListenServer) error {
 		err = stream.Send(&msg)
 		if err != nil {
 			log.Println("could not send msg", err.Error())
+			return err
 		}
 	}
-
 }
 
-func (s *RpcServer) mustEmbedUnimplementedGlowServer() error {
-	return nil
+func (s *RpcServer) mustEmbedUnimplementedGlowServer() {
+}
+
+func ListenRpc(down string, up string) *RpcServer {
+	lis, err := net.Listen("tcp", fmt.Sprintf("localhost%s", down))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	var opts []grpc.ServerOption
+
+	grpcServer := grpc.NewServer(opts...)
+	server := NewRpcServer(up)
+	RegisterGlowServer(grpcServer, server)
+	go grpcServer.Serve(lis)
+	return server
+
 }
