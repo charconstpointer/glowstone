@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
-	"github.com/charconstpointer/glowstone/pkg/glowstone"
-	"google.golang.org/grpc"
 	"log"
 	"net"
 	"time"
+
+	"github.com/charconstpointer/glowstone/pkg/glowstone"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -25,7 +26,7 @@ func main() {
 	}
 
 	//propagate up
-	go func(stream glowstone.Glow_ListenClient) {
+	go func(stream glowstone.Glow_ListenClient, downstream net.Conn) {
 		b := make([]byte, 32*1024)
 		for {
 			n, err := downstream.Read(b)
@@ -41,7 +42,7 @@ func main() {
 				log.Fatal(err.Error())
 			}
 		}
-	}(stream)
+	}(stream, downstream)
 	//propagate down
 	for {
 		msg, err := stream.Recv()
