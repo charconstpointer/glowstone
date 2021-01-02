@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net"
 	"regexp"
-	"time"
+
+	"github.com/charconstpointer/glowstone/pkg/glowstone"
 )
 
 func main() {
@@ -21,7 +23,6 @@ func main() {
 	size := 32 * 1024
 	buf := make([]byte, size)
 	for {
-		time.Sleep(1000 * time.Millisecond)
 		nr, er := conn.Read(buf)
 		if er != nil {
 			log.Println("could not read from upstream")
@@ -54,16 +55,10 @@ func (h *Handler) propagateUpstream() {
 	for {
 		nr, er := h.downstream.Read(buf)
 		if nr > 0 {
-			toWrite := buf
-			//TODO append client id
-			nw, _ := h.upstream.Write(toWrite[:nr])
-			if nw > 0 {
-
-			}
-			if nr != nw {
-				log.Println("propagateUpstream nr != nw ")
-				break
-			}
+			msg := glowstone.NewMsg(buf[:nr], "src string", "dest string")
+			b, _ := json.Marshal(&msg)
+			nw, _ := h.upstream.Write(b)
+			log.Println(nw)
 		}
 		if er != nil {
 			log.Println("propagateUpstream.err")
@@ -75,10 +70,11 @@ func (h *Handler) propagateUpstream() {
 }
 
 func (h *Handler) Handle(data []byte) {
-	log.Println(string(data))
 	if len(data) > 0 {
+		var msg glowstone.Msg
+		json.Unmarshal(data, &msg)
+		nw, _ := h.downstream.Write(msg.Payload)
 		//TODO remove client id
-		nw, _ := h.downstream.Write(data)
 		log.Printf("handler %s wrote %d bytes", h.ID, nw)
 		if nw > 0 {
 			// log.Println(nw)
