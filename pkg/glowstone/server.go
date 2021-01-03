@@ -26,7 +26,7 @@ type HTTPServer struct {
 
 type Server struct {
 	ID        string `json:"id"`
-	createdAt int    `json:"createdAt"`
+	CreatedAt int    `json:"createdAt"`
 }
 
 func NewServer() *HTTPServer {
@@ -69,7 +69,7 @@ func (s *HTTPServer) CreateServer() error {
 	}
 	serv := &Server{
 		ID:        resp.ID,
-		createdAt: int(time.Now().Unix()),
+		CreatedAt: int(time.Now().Unix()),
 	}
 	s.addServers(serv)
 	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {

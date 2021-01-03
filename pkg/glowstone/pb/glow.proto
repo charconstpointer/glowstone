@@ -4,10 +4,6 @@ package glowstone;
 
 option go_package = "pkg/glowstone";
 
-service Glow {
-    rpc Listen (stream Tick) returns (stream Tick);
-
-}
 
 message Tick {
     bytes payload=1;

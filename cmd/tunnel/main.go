@@ -1,11 +1,10 @@
 package main
 
 import (
-	"context"
 	"flag"
-	"github.com/charconstpointer/glowstone/pkg/glowstone"
-	"golang.org/x/sync/errgroup"
 	"log"
+
+	"github.com/charconstpointer/glowstone/pkg/glowstone"
 )
 
 var (
@@ -15,16 +14,9 @@ var (
 
 func main() {
 	flag.Parse()
-	server := glowstone.ListenRpc(*down,*up)
-	ctx := context.Background()
-	g, ctx := errgroup.WithContext(ctx)
-
-	g.Go(func() error {
-		return server.ListenUp()
-	})
-
-	err := g.Wait()
+	tunnel := glowstone.NewTunnel(*up, *down)
+	err := tunnel.Listen()
 	if err != nil {
-		log.Fatal("nejj",err.Error())
+		log.Fatal(err.Error())
 	}
 }
