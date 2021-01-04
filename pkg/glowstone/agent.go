@@ -93,7 +93,7 @@ func (a *Agent) listenDown() error {
 					return err
 				}
 				a.downstreams[tick.Src] = downstream
-				go a.listenUp(tick.Src, downstream)
+				go a.listenUp(tick.Src, a.upstream)
 			}
 
 			downstream := a.downstreams[tick.Src]
