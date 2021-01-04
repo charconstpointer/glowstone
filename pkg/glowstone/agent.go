@@ -17,8 +17,9 @@ type Agent struct {
 
 func NewAgent(addr string, downstream string) (*Agent, error) {
 	agent := Agent{
-		upAddr:   addr,
-		downAddr: downstream,
+		upAddr:      addr,
+		downAddr:    downstream,
+		downstreams: make(map[string]net.Conn),
 	}
 	figure.NewColorFigure("agent", "slant", "purple", true).Print()
 
@@ -39,9 +40,36 @@ func (a *Agent) createDownstream() (net.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Println("creating new downstream")
 	return conn, nil
 }
+func (a *Agent) listenUp(downstream net.Conn) error {
+	buffer := make([]byte, 32*1024)
 
+	for {
+		n, err := downstream.Read(buffer)
+		if err != nil {
+			return err
+		}
+		if n > 0 {
+			tick := Tick{
+				Src: "mc",
+				// Dest: a.upstrea,
+			}
+			b, _ := proto.Marshal(&tick)
+
+			if err != nil {
+				return err
+			}
+
+			n, err := downstream.Write(b)
+			if err != nil {
+				log.Fatal(err.Error())
+			}
+			log.Printf("🛵wrote %d bytes down", n)
+		}
+	}
+}
 func (a *Agent) listenDown() error {
 	buffer := make([]byte, 32*1024)
 
@@ -64,9 +92,11 @@ func (a *Agent) listenDown() error {
 					return err
 				}
 				a.downstreams[tick.Src] = downstream
+				go a.listenUp(downstream)
 			}
 
-			downstream := a.downstreams[tick.Dest]
+			downstream := a.downstreams[tick.Src]
+			log.Println("downstream", downstream == nil)
 			n, err := downstream.Write(tick.Payload)
 			if err != nil {
 				return err
