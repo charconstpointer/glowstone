@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"net"
 	"time"
@@ -10,88 +9,72 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-var (
-	up   = flag.String("up", ":8888", "upstream port")
-	down = flag.String("down", ":8889", "downstream port")
-)
-
 func main() {
-	flag.Parse()
-	dc, err := net.Listen("tcp", *down)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	ds, err := dc.Accept()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	c, _ := net.Listen("tcp", ":8889")
 
-	uc, err := net.Listen("tcp", *up)
-	us, err := uc.Accept()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	go func(c net.Listener) {
+		downstream, _ := c.Accept()
+		log.Println("downstream connected")
 
-	go func() {
-		b := make([]byte, 1024*100)
-		for {
-
-			n, err := us.Read(b)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			if n > 0 {
-				tick := glowstone.Tick{
-					Src:     us.RemoteAddr().String(),
-					Dest:    "mc",
-					Payload: b[:n],
-				}
-				// log.Printf("tick %v", tick)
-
-				msg, err := proto.Marshal(&tick)
-				if n != len(msg) {
-					log.Println(n, len(msg))
-				}
-				if err != nil {
-					log.Fatal(err.Error())
-				}
-				sent := 0
-				for sent < len(msg) {
-					bs, _ := ds.Write(msg[sent:])
-					sent += bs
-				}
-
-				log.Println(n == len(b))
-			}
+		clients, err := net.Listen("tcp", ":9000")
+		if err != nil {
+			log.Println(err.Error())
 		}
-	}()
+		client, _ := clients.Accept()
+		log.Println("new client")
 
-	go func(upstream net.Conn, downstream net.Conn) {
-		b := make([]byte, 1024*100)
-		for {
-			n, err := downstream.Read(b)
+		// go io.Copy(client, downstream)
+		// go io.Copy(downstream, client)
+		go readDs(downstream, client)
+		go readUs(downstream, client)
+	}(c)
+	time.Sleep(123443 * time.Second)
+}
 
-			if err != nil {
-				log.Fatal(err.Error())
-				continue
-			}
-			if n > 0 {
-				var tick glowstone.Tick
-				err := proto.Unmarshal(b[:n], &tick)
-				if err != nil {
-					log.Fatal(err.Error())
-				}
-				sent := 0
-				for sent < len(tick.Payload) {
-					bs, err := upstream.Write(tick.Payload[sent:])
-					if err != nil {
-						log.Fatal(err.Error())
-					}
-					sent += bs
-				}
-				log.Printf("wrote %d bytes to client", sent)
-			}
+func readUs(downstream net.Conn, upstream net.Conn) {
+	log.Println("readDs", downstream.RemoteAddr().String())
+	b := make([]byte, 1024*32)
+	for {
+		n, err := upstream.Read(b)
+		if err != nil {
+			log.Println(err.Error())
 		}
-	}(us, ds)
-	time.Sleep(321323 * time.Second)
+		if n > 0 {
+			log.Println("readDs", n)
+			payload := b[:n]
+			tick := glowstone.Tick{
+				Src:     "string",
+				Dest:    "string",
+				Payload: payload,
+			}
+			msg, _ := proto.Marshal(&tick)
+			nw, err := downstream.Write(msg)
+			if err != nil {
+				log.Println(nw, err.Error())
+			}
+			log.Println("readDs", nw)
+		}
+	}
+}
+
+func readDs(downstream net.Conn, upstream net.Conn) {
+	log.Println("readUs", downstream.RemoteAddr().String())
+	b := make([]byte, 1024*32)
+	for {
+		n, err := downstream.Read(b)
+		if err != nil {
+			log.Println(err.Error())
+		}
+		if n > 0 {
+			log.Println("readDs", n)
+
+			var tick glowstone.Tick
+			proto.Unmarshal(b[:n], &tick)
+			nw, err := upstream.Write(tick.Payload)
+			if err != nil {
+				log.Println(nw, err.Error())
+			}
+			log.Println("readDs", nw)
+		}
+	}
 }
