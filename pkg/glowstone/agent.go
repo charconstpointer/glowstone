@@ -43,7 +43,7 @@ func (a *Agent) createDownstream() (net.Conn, error) {
 	log.Println("creating new downstream")
 	return conn, nil
 }
-func (a *Agent) listenUp(downstream net.Conn) error {
+func (a *Agent) listenUp(dest string, downstream net.Conn) error {
 	buffer := make([]byte, 32*1024)
 
 	for {
@@ -53,8 +53,9 @@ func (a *Agent) listenUp(downstream net.Conn) error {
 		}
 		if n > 0 {
 			tick := Tick{
-				Src: "mc",
-				// Dest: a.upstrea,
+				Src:     "mc",
+				Dest:    dest,
+				Payload: buffer[:n],
 			}
 			b, _ := proto.Marshal(&tick)
 
@@ -92,7 +93,7 @@ func (a *Agent) listenDown() error {
 					return err
 				}
 				a.downstreams[tick.Src] = downstream
-				go a.listenUp(downstream)
+				go a.listenUp(tick.Src, downstream)
 			}
 
 			downstream := a.downstreams[tick.Src]
