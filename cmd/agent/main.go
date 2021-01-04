@@ -16,10 +16,16 @@ var (
 
 func main() {
 	flag.Parse()
-	conn, _ := net.Dial("tcp", ":8889")
-	downstream, _ := net.Dial("tpc", ":25565")
+	conn, err := net.Dial("tcp", ":8889")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	downstream, err := net.Dial("tcp", ":25565")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	go func(upstream net.Conn) {
-		b := make([]byte, 32*1024)
+		b := make([]byte, 1024*100)
 		for {
 			n, err := upstream.Read(b)
 
@@ -33,8 +39,12 @@ func main() {
 				if err != nil {
 					log.Fatal(err.Error())
 				}
-
-				n, err := downstream.Write(tick.Payload)
+				sent := 0
+				for sent < len(tick.Payload) {
+					bs, _ := downstream.Write(tick.Payload[sent:])
+					sent += bs
+				}
+				log.Println(n == len(b))
 				if err != nil {
 					log.Fatal(err.Error())
 				}
@@ -47,7 +57,7 @@ func main() {
 
 }
 func start(dest string, downstream net.Conn, upstream net.Conn) {
-	b := make([]byte, 32*1024)
+	b := make([]byte, 1024*100)
 	for {
 		n, err := downstream.Read(b)
 
@@ -61,14 +71,22 @@ func start(dest string, downstream net.Conn, upstream net.Conn) {
 				Dest:    dest,
 				Payload: b[:n],
 			}
-			b, err := proto.Marshal(&tick)
+			// log.Printf("tick %v", tick)
+			msg, err := proto.Marshal(&tick)
 			if err != nil {
 				log.Fatal(err.Error())
 			}
-
-			n, err := upstream.Write(b)
+			sent := 0
+			for sent < len(msg) {
+				bs, _ := upstream.Write(msg[sent:])
+				sent += bs
+			}
 			if err != nil {
 				log.Fatal(err.Error())
+			}
+			log.Println(n == len(b))
+			if n != len(msg) {
+				log.Println(sent, len(msg))
 			}
 			log.Printf("wrote %d bytes upstream %s", n, upstream.RemoteAddr().String())
 		}
