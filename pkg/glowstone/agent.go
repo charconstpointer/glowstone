@@ -1,11 +1,10 @@
 package glowstone
 
 import (
-	"context"
 	"log"
 	"net"
 
-	"golang.org/x/sync/errgroup"
+	"github.com/common-nighthawk/go-figure"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -16,12 +15,14 @@ type Agent struct {
 	upstream    net.Conn
 }
 
-func NewAgent(addr string, downstream string) *Agent {
+func NewAgent(addr string, downstream string) (*Agent, error) {
 	agent := Agent{
 		upAddr:   addr,
 		downAddr: downstream,
 	}
-	return &agent
+	figure.NewColorFigure("agent", "slant", "purple", true).Print()
+
+	return &agent, nil
 }
 
 func (a *Agent) dialUp() error {
@@ -29,7 +30,7 @@ func (a *Agent) dialUp() error {
 	if err != nil {
 		return err
 	}
-
+	log.Println(conn == nil)
 	a.upstream = conn
 	return nil
 }
@@ -77,8 +78,13 @@ func (a *Agent) listenDown() error {
 }
 
 func (a *Agent) Listen() error {
-	g, _ := errgroup.WithContext(context.Background())
-	g.Go(a.dialUp)
-	g.Go(a.listenDown)
-	return g.Wait()
+	err := a.dialUp()
+	if err != nil {
+		return err
+	}
+	err = a.listenDown()
+	if err != nil {
+		return err
+	}
+	return nil
 }
