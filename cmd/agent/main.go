@@ -43,32 +43,34 @@ func main() {
 		}
 	}(conn)
 
-	go func(dest string, downstream net.Conn, upstream net.Conn) {
-		b := make([]byte, 32*1024)
-		for {
-			n, err := downstream.Read(b)
+	start(conn.RemoteAddr().String(), downstream, conn)
 
+}
+func start(dest string, downstream net.Conn, upstream net.Conn) {
+	b := make([]byte, 32*1024)
+	for {
+		n, err := downstream.Read(b)
+
+		if err != nil {
+			log.Fatal(err.Error())
+			continue
+		}
+		if n > 0 {
+			tick := glowstone.Tick{
+				Src:     "mc",
+				Dest:    dest,
+				Payload: b[:n],
+			}
+			b, err := proto.Marshal(&tick)
 			if err != nil {
 				log.Fatal(err.Error())
-				continue
 			}
-			if n > 0 {
-				tick := glowstone.Tick{
-					Src:     "mc",
-					Dest:    dest,
-					Payload: b[:n],
-				}
-				b, err := proto.Marshal(&tick)
-				if err != nil {
-					log.Fatal(err.Error())
-				}
 
-				n, err := upstream.Write(b)
-				if err != nil {
-					log.Fatal(err.Error())
-				}
-				log.Printf("wrote %d bytes upstream %s", n, upstream.RemoteAddr().String())
+			n, err := upstream.Write(b)
+			if err != nil {
+				log.Fatal(err.Error())
 			}
+			log.Printf("wrote %d bytes upstream %s", n, upstream.RemoteAddr().String())
 		}
-	}(conn.RemoteAddr().String(), downstream, conn)
+	}
 }
