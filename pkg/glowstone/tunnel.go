@@ -138,5 +138,6 @@ func (t *Tunnel) Listen() error {
 	g, _ := errgroup.WithContext(context.Background())
 	g.Go(t.listenDown)
 	g.Go(t.listenUp)
+	g.Go(t.readDown)
 	return g.Wait()
 }
