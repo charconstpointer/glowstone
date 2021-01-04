@@ -116,13 +116,14 @@ func (t *Tunnel) readDown() error {
 			return err
 		}
 		if n > 0 {
+
 			var tick Tick
 			err = proto.Unmarshal(buffer[:n], &tick)
 
 			if err != nil {
 				return err
 			}
-
+			log.Printf("tick : %v", tick)
 			upstream := t.upstreams[tick.Dest]
 			err := upstream.Up(tick.Payload)
 
