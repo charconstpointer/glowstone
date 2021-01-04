@@ -21,9 +21,10 @@ type Tunnel struct {
 
 func NewTunnel(addr string, downAddr string) *Tunnel {
 	tunnel := Tunnel{
-		addr:     addr,
-		downAddr: downAddr,
-		newUp:    make(chan *Upstream),
+		addr:      addr,
+		downAddr:  downAddr,
+		newUp:     make(chan *Upstream),
+		upstreams: make(map[string]*Upstream),
 	}
 	figure.NewColorFigure("tunnel", "slant", "green", true).Print()
 
@@ -64,6 +65,7 @@ func (t *Tunnel) listenDown() error {
 			log.Println(err.Error())
 			continue
 		}
+		t.downstream = client
 	}
 
 }
