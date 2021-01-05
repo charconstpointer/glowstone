@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="20f793eb-6628-4f8f-9440-a2f813451b69" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/agent/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/agent/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/tunnel/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/tunnel/main.go" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="GOROOT" path="C:\Go" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GoLibraries">
+    <option name="indexEntireGoPath" value="false" />
+  </component>
+  <component name="ProjectId" id="1mb08xedsx4ZcHnKtAyWfVUBKdf" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="go.import.settings.migrated" value="true" />
+    <property name="go.sdk.automatically.set" value="true" />
+    <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
+    <property name="last_opened_file_path" value="$USER_HOME$" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+  </component>
+  <component name="RunManager" selected="Go Build.go build github.com/charconstpointer/glowstone/cmd/tunnel">
+    <configuration name="go build github.com/charconstpointer/glowstone/cmd/agent" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="glowstone" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <filePath value="$PROJECT_DIR$/cmd/agent/main.go" />
+      <package value="github.com/charconstpointer/glowstone/cmd/agent" />
+      <directory value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build github.com/charconstpointer/glowstone/cmd/tunnel" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="glowstone" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <filePath value="$PROJECT_DIR$/cmd/tunnel/main.go" />
+      <package value="github.com/charconstpointer/glowstone/cmd/tunnel" />
+      <directory value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Go Build.go build github.com/charconstpointer/glowstone/cmd/tunnel" />
+        <item itemvalue="Go Build.go build github.com/charconstpointer/glowstone/cmd/agent" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VgoProject">
+    <integration-enabled>true</integration-enabled>
+  </component>
+  <component name="WindowStateProjectService">
+    <state width="662" height="466" key="DebuggerActiveHint" timestamp="1609815167462">
+      <screen x="0" y="0" width="3440" height="1400" />
+    </state>
+    <state width="662" height="466" key="DebuggerActiveHint/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609815167462" />
+    <state width="1861" height="450" key="GridCell.Tab.0.bottom" timestamp="1609815810087">
+      <screen x="0" y="0" width="3440" height="1400" />
+    </state>
+    <state width="1861" height="450" key="GridCell.Tab.0.bottom/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609815810087" />
+    <state width="1861" height="450" key="GridCell.Tab.0.center" timestamp="1609815810087">
+      <screen x="0" y="0" width="3440" height="1400" />
+    </state>
+    <state width="1861" height="450" key="GridCell.Tab.0.center/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609815810087" />
+    <state width="1861" height="450" key="GridCell.Tab.0.left" timestamp="1609815810087">
+      <screen x="0" y="0" width="3440" height="1400" />
+    </state>
+    <state width="1861" height="450" key="GridCell.Tab.0.left/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609815810087" />
+    <state width="1861" height="450" key="GridCell.Tab.0.right" timestamp="1609815810087">
+      <screen x="0" y="0" width="3440" height="1400" />
+    </state>
+    <state width="1861" height="450" key="GridCell.Tab.0.right/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609815810087" />
+    <state width="1861" height="450" key="GridCell.Tab.1.bottom" timestamp="1609815812608">
+      <screen x="0" y="0" width="3440" height="1400" />
+    </state>
+    <state width="1861" height="450" key="GridCell.Tab.1.bottom/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609815812608" />
+    <state width="1861" height="450" key="GridCell.Tab.1.center" timestamp="1609815812608">
+      <screen x="0" y="0" width="3440" height="1400" />
+    </state>
+    <state width="1861" height="450" key="GridCell.Tab.1.center/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609815812608" />
+    <state width="1861" height="450" key="GridCell.Tab.1.left" timestamp="1609815812608">
+      <screen x="0" y="0" width="3440" height="1400" />
+    </state>
+    <state width="1861" height="450" key="GridCell.Tab.1.left/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609815812608" />
+    <state width="1861" height="450" key="GridCell.Tab.1.right" timestamp="1609815812608">
+      <screen x="0" y="0" width="3440" height="1400" />
+    </state>
+    <state width="1861" height="450" key="GridCell.Tab.1.right/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609815812608" />
+    <state width="960" height="651" key="XDebugger.FullValuePopup" timestamp="1609812289864">
+      <screen x="0" y="0" width="3440" height="1400" />
+    </state>
+    <state width="960" height="651" key="XDebugger.FullValuePopup/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609812289864" />
+    <state x="1490" y="595" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1609746840197">
+      <screen x="0" y="0" width="3440" height="1400" />
+    </state>
+    <state x="1490" y="595" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609746840197" />
+  </component>
+</project>
