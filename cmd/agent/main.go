@@ -36,50 +36,100 @@ func main() {
 }
 
 func readDs(downstream net.Conn, upstream net.Conn) {
-	log.Println("readDs", downstream.RemoteAddr().String())
-	b := make([]byte, 1024*32)
+	log.Println("agent read downstream", downstream.RemoteAddr().String())
 	for {
+		b := make([]byte, 10000*1024)
 		n, err := downstream.Read(b)
-		if err != nil {
-			log.Println(err.Error())
+		if n == len(b) {
+			time.Sleep(time.Second)
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
 		}
 		if n > 0 {
 			log.Println("readDs", n)
 			payload := b[:n]
-			tick := glowstone.Tick{
+			tick := &glowstone.Tick{
 				Src:     "string",
 				Dest:    "string",
 				Payload: payload,
 			}
-			msg, _ := proto.Marshal(&tick)
+			msg, err := proto.Marshal(tick)
+			if err != nil {
+				log.Println("marshall", err.Error())
+				time.Sleep(250 * time.Millisecond)
+			}
 			nw, err := upstream.Write(msg)
+			if nw < len(msg) {
+				log.Println("partial write?")
+				time.Sleep(250 * time.Millisecond)
+			}
+			log.Println("agent sent", nw, n)
 			if err != nil {
 				log.Println(nw, err.Error())
+				time.Sleep(250 * time.Millisecond)
 			}
 			log.Println("readDs", nw)
+		}
+
+		if err != nil {
+			log.Println(err.Error())
+			time.Sleep(250 * time.Millisecond)
 		}
 	}
 }
 
 func readUs(downstream net.Conn, upstream net.Conn) {
-	log.Println("readUs", downstream.RemoteAddr().String())
+	log.Println("agent read upstream")
 
-	b := make([]byte, 1024*32)
 	for {
+		b := make([]byte, 10000*1024)
 		n, err := upstream.Read(b)
-		if err != nil {
-			log.Println(err.Error())
+		if n == len(b) {
+			time.Sleep(time.Second)
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
 		}
 		if n > 0 {
 			log.Println("readUs", n)
 
 			var tick glowstone.Tick
-			proto.Unmarshal(b[:n], &tick)
-			nw, err := downstream.Write(tick.Payload)
+			err := proto.Unmarshal(b[:n], &tick)
+			if err != nil {
+				log.Println("marshall", err.Error())
+				time.Sleep(250 * time.Millisecond)
+			}
+			if len(tick.GetPayload()) > 2097152 {
+				log.Fatal("2097152")
+				time.Sleep(250 * time.Millisecond)
+			}
+			nw, err := downstream.Write(tick.GetPayload())
 			log.Println("readUs", nw)
 			if err != nil {
 				log.Println(nw, err.Error())
+				time.Sleep(250 * time.Millisecond)
 			}
+		}
+		if err != nil {
+			log.Println(err.Error())
+			time.Sleep(250 * time.Millisecond)
 		}
 	}
 }

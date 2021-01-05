@@ -32,12 +32,23 @@ func main() {
 }
 
 func readUs(downstream net.Conn, upstream net.Conn) {
-	log.Println("readDs", downstream.RemoteAddr().String())
-	b := make([]byte, 1024*32)
+	log.Println("tunnel read upstream")
 	for {
+		b := make([]byte, 10000*1024)
 		n, err := upstream.Read(b)
-		if err != nil {
-			log.Println(err.Error())
+		if n == len(b) {
+			time.Sleep(time.Second)
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
+			log.Println("hol uppp")
 		}
 		if n > 0 {
 			log.Println("readDs", n)
@@ -47,34 +58,59 @@ func readUs(downstream net.Conn, upstream net.Conn) {
 				Dest:    "string",
 				Payload: payload,
 			}
-			msg, _ := proto.Marshal(&tick)
+			msg, err := proto.Marshal(&tick)
+			if err != nil {
+				log.Println("marshall", err.Error())
+				time.Sleep(250 * time.Millisecond)
+			}
 			nw, err := downstream.Write(msg)
+			if nw < len(msg) {
+				log.Println("partial write?", nw, len(msg))
+				time.Sleep(250 * time.Millisecond)
+			}
 			if err != nil {
 				log.Println(nw, err.Error())
+				time.Sleep(250 * time.Millisecond)
 			}
-			log.Println("readDs", nw)
+		}
+		if err != nil {
+			continue
+			log.Println("tunnel read upstream", err.Error())
+			time.Sleep(250 * time.Millisecond)
 		}
 	}
 }
 
 func readDs(downstream net.Conn, upstream net.Conn) {
-	log.Println("readUs", downstream.RemoteAddr().String())
-	b := make([]byte, 1024*32)
 	for {
+		b := make([]byte, 10000*1024)
 		n, err := downstream.Read(b)
-		if err != nil {
-			log.Println(err.Error())
+		if n == len(b) {
+			time.Sleep(time.Second)
+			log.Println("hol uppp")
+
 		}
 		if n > 0 {
-			log.Println("readDs", n)
+			log.Println("tunnel read downstream", n)
 
 			var tick glowstone.Tick
-			proto.Unmarshal(b[:n], &tick)
-			nw, err := upstream.Write(tick.Payload)
+			err := proto.Unmarshal(b[:n], &tick)
 			if err != nil {
-				log.Println(nw, err.Error())
+				log.Println("unmarshal error", err.Error())
+				time.Sleep(250 * time.Millisecond)
 			}
-			log.Println("readDs", nw)
+			nw, err := upstream.Write(tick.GetPayload())
+			log.Println("tunnel sent", nw, n)
+			if err != nil {
+				log.Println("tunnel read downstream error", nw, err.Error())
+				time.Sleep(250 * time.Millisecond)
+			}
+
+		}
+		if err != nil {
+			continue
+			log.Println(err.Error())
+			time.Sleep(250 * time.Millisecond)
 		}
 	}
 }
