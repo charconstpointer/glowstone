@@ -1,4 +1,5 @@
 syntax = "proto3";
+import "google/protobuf/any.proto";    
 
 package glowstone;
 
@@ -8,6 +9,6 @@ option go_package = "pkg/glowstone";
 message Tick {
     string src=1;
     string dest=2;
-    bytes payload=3;
+    google.protobuf.Any payload=3;
 }
 
