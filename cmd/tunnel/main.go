@@ -69,7 +69,7 @@ func main() {
 				log.Fatal(err.Error())
 			}
 
-			n, err := ds.Write(tick.Payload)
+			n, err := ds.Write(tick.GetPayload())
 			if err != nil {
 				log.Fatal(err.Error())
 			}
