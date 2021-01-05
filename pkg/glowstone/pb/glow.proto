@@ -8,5 +8,9 @@ option go_package = "pkg/glowstone";
 message Tick {
     string src=1;
     string dest=2;
-    bytes payload=3;
+    Payload payload=3;
+}
+
+message Payload {
+    repeated fixed64 b=1;
 }
