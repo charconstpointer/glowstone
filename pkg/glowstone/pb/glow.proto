@@ -12,5 +12,5 @@ message Tick {
 }
 
 message Payload {
-    repeated fixed64 b=1;
+    bytes b=1;
 }
