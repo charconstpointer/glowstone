@@ -4,14 +4,13 @@ import (
 	"context"
 	"log"
 	"net"
-	"time"
 
 	"github.com/charconstpointer/glowstone/pkg/glowstone"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	conn, err := grpc.Dial(":8889", grpc.WithInsecure())
+	conn, err := grpc.Dial("34.70.202.185:8889", grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -49,7 +48,7 @@ func main() {
 		msg, err := stream.Recv()
 		if err != nil {
 			log.Println(err.Error())
-			time.Sleep(100 * time.Millisecond)
+
 			continue
 		}
 		n, err := downstream.Write(msg.Payload)
