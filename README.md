@@ -22,4 +22,3 @@ proxy.Listen()
 ![](https://i.imgur.com/HZhy7HJ.png)
 
 
-![](https://i.imgur.com/e7xKx8A.png)
