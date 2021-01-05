@@ -37,7 +37,7 @@
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
   </component>
-  <component name="RunManager" selected="Go Build.go build github.com/charconstpointer/glowstone/cmd/agent">
+  <component name="RunManager" selected="Go Build.go build github.com/charconstpointer/glowstone/cmd/tunnel">
     <configuration name="go build github.com/charconstpointer/glowstone/cmd/agent" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="glowstone" />
       <working_directory value="$PROJECT_DIR$" />
@@ -58,8 +58,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Build.go build github.com/charconstpointer/glowstone/cmd/agent" />
         <item itemvalue="Go Build.go build github.com/charconstpointer/glowstone/cmd/tunnel" />
+        <item itemvalue="Go Build.go build github.com/charconstpointer/glowstone/cmd/agent" />
       </list>
     </recent_temporary>
   </component>
@@ -71,38 +71,42 @@
     <integration-enabled>true</integration-enabled>
   </component>
   <component name="WindowStateProjectService">
-    <state width="1861" height="450" key="GridCell.Tab.0.bottom" timestamp="1609813269427">
+    <state width="662" height="466" key="DebuggerActiveHint" timestamp="1609815167462">
       <screen x="0" y="0" width="3440" height="1400" />
     </state>
-    <state width="1861" height="450" key="GridCell.Tab.0.bottom/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609813269427" />
-    <state width="1861" height="450" key="GridCell.Tab.0.center" timestamp="1609813269426">
+    <state width="662" height="466" key="DebuggerActiveHint/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609815167462" />
+    <state width="1861" height="450" key="GridCell.Tab.0.bottom" timestamp="1609815810087">
       <screen x="0" y="0" width="3440" height="1400" />
     </state>
-    <state width="1861" height="450" key="GridCell.Tab.0.center/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609813269426" />
-    <state width="1861" height="450" key="GridCell.Tab.0.left" timestamp="1609813269426">
+    <state width="1861" height="450" key="GridCell.Tab.0.bottom/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609815810087" />
+    <state width="1861" height="450" key="GridCell.Tab.0.center" timestamp="1609815810087">
       <screen x="0" y="0" width="3440" height="1400" />
     </state>
-    <state width="1861" height="450" key="GridCell.Tab.0.left/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609813269426" />
-    <state width="1861" height="450" key="GridCell.Tab.0.right" timestamp="1609813269427">
+    <state width="1861" height="450" key="GridCell.Tab.0.center/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609815810087" />
+    <state width="1861" height="450" key="GridCell.Tab.0.left" timestamp="1609815810087">
       <screen x="0" y="0" width="3440" height="1400" />
     </state>
-    <state width="1861" height="450" key="GridCell.Tab.0.right/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609813269427" />
-    <state width="1861" height="450" key="GridCell.Tab.1.bottom" timestamp="1609813262043">
+    <state width="1861" height="450" key="GridCell.Tab.0.left/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609815810087" />
+    <state width="1861" height="450" key="GridCell.Tab.0.right" timestamp="1609815810087">
       <screen x="0" y="0" width="3440" height="1400" />
     </state>
-    <state width="1861" height="450" key="GridCell.Tab.1.bottom/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609813262043" />
-    <state width="1861" height="450" key="GridCell.Tab.1.center" timestamp="1609813262042">
+    <state width="1861" height="450" key="GridCell.Tab.0.right/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609815810087" />
+    <state width="1861" height="450" key="GridCell.Tab.1.bottom" timestamp="1609815812608">
       <screen x="0" y="0" width="3440" height="1400" />
     </state>
-    <state width="1861" height="450" key="GridCell.Tab.1.center/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609813262042" />
-    <state width="1861" height="450" key="GridCell.Tab.1.left" timestamp="1609813262042">
+    <state width="1861" height="450" key="GridCell.Tab.1.bottom/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609815812608" />
+    <state width="1861" height="450" key="GridCell.Tab.1.center" timestamp="1609815812608">
       <screen x="0" y="0" width="3440" height="1400" />
     </state>
-    <state width="1861" height="450" key="GridCell.Tab.1.left/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609813262042" />
-    <state width="1861" height="450" key="GridCell.Tab.1.right" timestamp="1609813262043">
+    <state width="1861" height="450" key="GridCell.Tab.1.center/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609815812608" />
+    <state width="1861" height="450" key="GridCell.Tab.1.left" timestamp="1609815812608">
       <screen x="0" y="0" width="3440" height="1400" />
     </state>
-    <state width="1861" height="450" key="GridCell.Tab.1.right/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609813262043" />
+    <state width="1861" height="450" key="GridCell.Tab.1.left/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609815812608" />
+    <state width="1861" height="450" key="GridCell.Tab.1.right" timestamp="1609815812608">
+      <screen x="0" y="0" width="3440" height="1400" />
+    </state>
+    <state width="1861" height="450" key="GridCell.Tab.1.right/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609815812608" />
     <state width="960" height="651" key="XDebugger.FullValuePopup" timestamp="1609812289864">
       <screen x="0" y="0" width="3440" height="1400" />
     </state>
@@ -111,21 +115,5 @@
       <screen x="0" y="0" width="3440" height="1400" />
     </state>
     <state x="1490" y="595" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.3440.1400/-1440.-660.1440.2520@0.0.3440.1400" timestamp="1609746840197" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/cmd/tunnel/main.go</url>
-          <line>38</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/cmd/agent/main.go</url>
-          <line>56</line>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

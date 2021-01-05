@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/charconstpointer/glowstone/pkg/glowstone"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 var (
@@ -36,52 +36,33 @@ func main() {
 }
 
 func readDs(downstream net.Conn, upstream net.Conn) {
-	log.Println("agent read downstream", downstream.RemoteAddr().String())
+	log.Println("tunnel read upstream")
+	b := make([]byte, 512)
 	for {
-		b := make([]byte, 10000*1024)
 		n, err := downstream.Read(b)
-		if n == len(b) {
-			time.Sleep(time.Second)
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-		}
+		log.Println("read from up", n)
 		if n > 0 {
-			log.Println("readDs", n)
-			payload := b[:n]
-			tick := &glowstone.Tick{
-				Src:     "string",
+			tick := glowstone.Tick{
+				Src:     "stringxddddd",
 				Dest:    "string",
-				Payload: payload,
+				Payload: b[:n],
 			}
-			msg, err := proto.Marshal(tick)
+			msg, err := proto.Marshal(&tick)
 			if err != nil {
 				log.Println("marshall", err.Error())
-				time.Sleep(250 * time.Millisecond)
+				continue
 			}
 			nw, err := upstream.Write(msg)
-			if nw < len(msg) {
-				log.Println("partial write?")
-				time.Sleep(250 * time.Millisecond)
-			}
-			log.Println("agent sent", nw, n)
+			//nw, err := downstream.Write(b[:n])
+
 			if err != nil {
 				log.Println(nw, err.Error())
 				time.Sleep(250 * time.Millisecond)
 			}
-			log.Println("readDs", nw)
 		}
-
 		if err != nil {
-			log.Println(err.Error())
+
+			log.Println("tunnel read upstream", err.Error())
 			time.Sleep(250 * time.Millisecond)
 		}
 	}
@@ -89,39 +70,18 @@ func readDs(downstream net.Conn, upstream net.Conn) {
 
 func readUs(downstream net.Conn, upstream net.Conn) {
 	log.Println("agent read upstream")
-
+	b := make([]byte, 531)
 	for {
-		b := make([]byte, 10000*1024)
 		n, err := upstream.Read(b)
-		if n == len(b) {
-			time.Sleep(time.Second)
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-			log.Println("hol uppp")
-		}
 		if n > 0 {
-			log.Println("readUs", n)
-
 			var tick glowstone.Tick
 			err := proto.Unmarshal(b[:n], &tick)
 			if err != nil {
 				log.Println("marshall", err.Error())
 				time.Sleep(250 * time.Millisecond)
 			}
-			if len(tick.GetPayload()) > 2097152 {
-				log.Fatal("2097152")
-				time.Sleep(250 * time.Millisecond)
-			}
 			nw, err := downstream.Write(tick.GetPayload())
-			log.Println("readUs", nw)
+			//nw, err := downstream.Write(b[:n])
 			if err != nil {
 				log.Println(nw, err.Error())
 				time.Sleep(250 * time.Millisecond)
