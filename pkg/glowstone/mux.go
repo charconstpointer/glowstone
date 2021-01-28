@@ -1,135 +1,153 @@
 package glowstone
 
 import (
-	context "context"
+	"bytes"
+	"context"
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"strconv"
+	"strings"
 	"time"
 
-	"google.golang.org/grpc"
-
+	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
 
-type RpcServer struct {
-	upstreams []net.Conn
-	upAddr    string
-	new       chan net.Conn
+type Mux struct {
+	clients map[int]net.Conn
+	next    net.Conn
 }
 
-func NewRpcServer(up string) *RpcServer {
-	return &RpcServer{
-		upAddr: up,
-		new:    make(chan net.Conn),
+func NewMux() *Mux {
+	return &Mux{
+		clients: make(map[int]net.Conn),
 	}
 }
 
-func (s *RpcServer) ListenUp() error {
-	l, err := net.Listen("tcp", s.upAddr)
+func (m *Mux) Dial(addr string) error {
+	if m.next != nil {
+		return fmt.Errorf("cannot dial new mux as this mux is already connected with a different one on addr %s", m.next.RemoteAddr().String())
+	}
+	conn, err := net.Dial("tcp", addr)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "cannot dial another mutex")
 	}
 
-	for {
-		conn, err := l.Accept()
-		log.Println("new client connected", conn.RemoteAddr())
-		if err != nil {
-			return err
-		}
-		s.upstreams = append(s.upstreams, conn)
-		log.Println("indexing new")
-		s.new <- conn
-		log.Println("new client indexed")
-	}
-}
-
-func (s *RpcServer) Listen(stream Glow_ListenServer) error {
-	ctx := context.Background()
-	g, ctx := errgroup.WithContext(ctx)
-
-	for _, upstream := range s.upstreams {
-		g.Go(func() error {
-			return listenUpstream(upstream, stream)
-		})
-	}
-
-	g.Go(func() error {
-		log.Println("started watching for new clients")
-		for {
-			log.Println("select")
-			select {
-			case c := <-s.new:
-				log.Println("handling new client")
-				go listenUpstream(c, stream)
-			}
-		}
-	})
-
-	g.Go(func() error {
-		for {
-			msg, err := stream.Recv()
-			if err != nil {
-				log.Println("cannot receive", err.Error())
-				time.Sleep(time.Second)
-				continue
-			}
-
-			if len(s.upstreams) > 0 {
-				log.Println(s.upstreams)
-				n, err := s.upstreams[0].Write(msg.Payload)
-				if n == 0 {
-					s.upstreams = append(s.upstreams[:0], s.upstreams[1:]...)
-					//TODO propagate this event downstream, to close dead connection tunnel->minecraft
-					log.Println("Removed dead client")
-				}
-				if err != nil {
-					log.Println("cant write")
-				}
-				log.Println("wrote", n, "bytes up")
-			}
-
-		}
-		return nil
-	})
-	err := g.Wait()
+	m.next = conn
 	return err
 }
 
-func listenUpstream(upstream net.Conn, stream Glow_ListenServer) error {
-	b := make([]byte, 32*1024)
-	for {
-		n, err := upstream.Read(b)
-		if err != nil {
-			return err
-		}
-		msg := Tick{
-			Payload: b[:n],
-			Src:     "Src",
-			Dest:    "Dest",
-		}
-		err = stream.Send(&msg)
-		if err != nil {
-			log.Println("could not send msg", err.Error())
-			return err
-		}
-	}
+func (m *Mux) ListenMux(addr string) error {
+	l, err := net.Listen("tcp", addr)
+	conn, err := l.Accept()
+	m.next = conn
+	go m.Recv()
+	log.Printf("new mux connected %s", conn.RemoteAddr().String())
+	return err
 }
 
-func (s *RpcServer) mustEmbedUnimplementedGlowServer() {
-}
-
-func ListenRpc(down string, up string) *RpcServer {
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost%s", down))
+func (m *Mux) Listen(addr string) error {
+	g, _ := errgroup.WithContext(context.Background())
+	l, err := net.Listen("tcp", addr)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		return err
 	}
-	var opts []grpc.ServerOption
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			return err
+		}
+		id := getID(conn.RemoteAddr().String())
+		m.clients[int(id)] = conn
+		g.Go(func() error {
+			return m.handleConn(conn, int(id))
+		})
+	}
 
-	grpcServer := grpc.NewServer(opts...)
-	server := NewRpcServer(up)
-	RegisterGlowServer(grpcServer, server)
-	go grpcServer.Serve(lis)
-	return server
+}
 
+func (m *Mux) Recv() error {
+	for {
+
+		h := Header(make([]byte, HeaderSize))
+		n, err := io.ReadFull(m.next, h)
+		if h.Len() == 0 {
+			m.next.Close()
+			return errors.New("dc?")
+		}
+		id := h.ID()
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+
+		b := make([]byte, int(h.Len()))
+		n, err = io.ReadFull(m.next, b)
+		if err != nil {
+			return err
+		}
+
+		if n > 0 {
+			c, e := m.clients[int(id)]
+			if !e {
+				conn, err := net.Dial("tcp", ":25565")
+				if err != nil {
+					log.Println("cannot dial minecraft", err.Error())
+					return err
+				}
+				m.clients[int(id)] = conn
+				go m.handleConn(conn, int(id))
+				time.Sleep(time.Millisecond * 100)
+			}
+			c = m.clients[int(id)]
+			io.Copy(c, bytes.NewBuffer(b))
+			if err != nil {
+				log.Println("cannot write payload to minecraft")
+			}
+
+			if n == 0 {
+				log.Println("cannot write payload to minecraft")
+			}
+		}
+	}
+}
+
+func (m *Mux) handleConn(conn net.Conn, id int) error {
+	log.Printf("handling new conn %s", conn.RemoteAddr().String())
+	for {
+		b := make([]byte, 1024)
+		nr, err := conn.Read(b)
+
+		if err != nil {
+			return errors.Wrap(err, "cannot read from handled connection")
+		}
+		if nr == 0 {
+			conn.Close()
+			return errors.New("dc??")
+		}
+		if nr > 0 {
+			h := make(Header, HeaderSize)
+			h.Encode(PASS, int32(id), int32(nr))
+			sent := 0
+			for sent < HeaderSize {
+				n, _ := m.next.Write(h)
+				sent += n
+			}
+
+			_, _ = io.Copy(m.next, bytes.NewReader(b[:nr]))
+
+		}
+	}
+}
+
+func getID(addr string) uint32 {
+	i := strings.LastIndex(addr, ":")
+	id := addr[i+1:]
+	parsed, err := strconv.Atoi(id)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	return uint32(parsed)
 }

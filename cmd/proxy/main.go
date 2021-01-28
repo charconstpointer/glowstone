@@ -1,20 +1,18 @@
 package main
 
 import (
-	"flag"
 	"log"
 
 	"github.com/charconstpointer/glowstone/pkg/glowstone"
 )
 
-var (
-	downstream = flag.String("downstream", ":25565", "downstream path")
-	addr       = flag.String("addr", ":4013", "address for proxy to listen on")
-)
-
 func main() {
-	flag.Parse()
-	log.Println(*downstream, *addr)
-	proxy := glowstone.NewProxy(*addr, *downstream)
-	proxy.Listen()
+	m := glowstone.NewMux()
+	if err := m.ListenMux(":8000"); err != nil {
+		log.Fatal(err.Error())
+	}
+
+	if err := m.Listen(":9000"); err != nil {
+		log.Fatal(err.Error())
+	}
 }
