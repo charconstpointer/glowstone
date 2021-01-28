@@ -1,24 +1,8 @@
 # glowstone 🌟
-### Minecraft server proxy 💫
 
-> :4013 is a port you'd like to listen on for incoming connections
+### glowstone allows other people to join your localhost games 🎢
 
-> :25565, :25566 are downstream servers, if multiple addresses are provided traffic will be load balanced between servers (round robin)
-```
-proxy := glowstone.NewProxy(":4013", ":25565", ":25566")
-proxy.Listen()
-```
-
-> Add new server
-
-![](https://i.imgur.com/YrBW4bP.png)
-
-> Your server should be visible and repspond to client's healthchecks
-
-![](https://i.imgur.com/Itc5rZv.png)
-
->If your downstream servers are reachable, you should be able to play 🍾
-
-![](https://i.imgur.com/HZhy7HJ.png)
-
+### if you're familiar with services like https://aternos.org/ you know that queues can get ridicolous
+### with glowstone you can just host your own server and let other people join it via glowstone proxy/tcp mux
+### for now you have to host the proxy yourself, but even smallest vm will suffice which is not true for mc servers
 
