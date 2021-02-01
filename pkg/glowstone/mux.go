@@ -79,7 +79,7 @@ func (m *Mux) Recv() error {
 		}
 		id := h.ID()
 		if err != nil {
-			log.Fatal(err.Error())
+			log.Println(err.Error())
 		}
 
 		b := make([]byte, int(h.Len()))
@@ -147,7 +147,7 @@ func getID(addr string) uint32 {
 	id := addr[i+1:]
 	parsed, err := strconv.Atoi(id)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Println(err.Error())
 	}
 
 	return uint32(parsed)

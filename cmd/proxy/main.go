@@ -9,10 +9,10 @@ import (
 func main() {
 	m := glowstone.NewMux()
 	if err := m.ListenMux(":8000"); err != nil {
-		log.Fatal(err.Error())
+		log.Println(err.Error())
 	}
 
 	if err := m.Listen(":9000"); err != nil {
-		log.Fatal(err.Error())
+		log.Println(err.Error())
 	}
 }
