@@ -92,8 +92,8 @@ func (m *Mux) Recv() error {
 		if n > 0 {
 			c, e := m.clients[int(id)]
 			if !e {
-				// conn, err := net.Dial("tcp", ":25565")
-				conn, err := net.Dial("tcp", ":64884")
+				conn, err := net.Dial("tcp", ":25565")
+				// conn, err := net.Dial("tcp", ":64884")
 				if err != nil {
 					log.Println("cannot dial minecraft", err.Error())
 					return err
@@ -118,7 +118,7 @@ func (m *Mux) Recv() error {
 func (m *Mux) handleConn(conn net.Conn, id int) error {
 	log.Printf("handling new conn %s", conn.RemoteAddr().String())
 	for {
-		b := make([]byte, 1024)
+		b := make([]byte, 4096)
 		nr, err := conn.Read(b)
 
 		if err != nil {
@@ -137,7 +137,11 @@ func (m *Mux) handleConn(conn net.Conn, id int) error {
 				sent += n
 			}
 
-			_, _ = io.Copy(m.next, bytes.NewReader(b[:nr]))
+			n, err := io.Copy(m.next, bytes.NewReader(b[:nr]))
+			if err != nil {
+				log.Println("copy", err.Error())
+			}
+			log.Println("wrote", n, "expected", nr)
 
 		}
 	}
