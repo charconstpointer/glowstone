@@ -74,8 +74,9 @@ func (m *Mux) Recv() error {
 		h := Header(make([]byte, HeaderSize))
 		n, err := io.ReadFull(m.next, h)
 		if h.Len() == 0 {
-			m.next.Close()
-			return errors.New("dc?")
+			continue
+			// m.next.Close()
+			// return errors.New("dc?")
 		}
 		id := h.ID()
 		if err != nil {
@@ -123,10 +124,10 @@ func (m *Mux) handleConn(conn net.Conn, id int) error {
 		if err != nil {
 			return errors.Wrap(err, "cannot read from handled connection")
 		}
-		if nr == 0 {
-			conn.Close()
-			return errors.New("dc??")
-		}
+		// if nr == 0 {
+		// 	conn.Close()
+		// 	return errors.New("dc??")
+		// }
 		if nr > 0 {
 			h := make(Header, HeaderSize)
 			h.Encode(PASS, int32(id), int32(nr))
