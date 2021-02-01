@@ -9,8 +9,8 @@ import (
 
 func main() {
 	m := glowstone.NewMux()
-	// if err := m.Dial("ec2-18-134-242-182.eu-west-2.compute.amazonaws.com:8000"); err != nil {
-	if err := m.Dial(":8000"); err != nil {
+	if err := m.Dial("ec2-3-8-238-16.eu-west-2.compute.amazonaws.com:8000"); err != nil {
+		// if err := m.Dial(":8000"); err != nil {
 		// if err := m.Dial("159.89.4.159:8000"); err != nil {
 		log.Fatal(err.Error())
 	}

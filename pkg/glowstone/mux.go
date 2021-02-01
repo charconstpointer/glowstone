@@ -91,7 +91,8 @@ func (m *Mux) Recv() error {
 		if n > 0 {
 			c, e := m.clients[int(id)]
 			if !e {
-				conn, err := net.Dial("tcp", ":25565")
+				// conn, err := net.Dial("tcp", ":25565")
+				conn, err := net.Dial("tcp", ":64884")
 				if err != nil {
 					log.Println("cannot dial minecraft", err.Error())
 					return err
